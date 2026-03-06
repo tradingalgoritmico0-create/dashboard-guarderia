@@ -1,0 +1,12 @@
+[
+  {"id":1,"nombre":"Juan Pérez García","fechaNac":"2019-03-15","grupo":"Peque","sexo":"H","fechaIngreso":"2024-01-08","status":"Activo","tutor":"María Pérez","telefono":"5551234567","empresa":"Comunidad","empresaFact":"Comunidad"},
+  {"id":2,"nombre":"Ana García López","fechaNac":"2018-08-22","grupo":"Intermedio","sexo":"M","fechaIngreso":"2024-01-08","status":"Activo","tutor":"Carlos García","telefono":"5552345678","empresa":"Xtra","empresaFact":"Xtra"},
+  {"id":3,"nombre":"Carlos Martínez Soto","fechaNac":"2020-01-10","grupo":"Grande","sexo":"H","fechaIngreso":"2024-02-15","status":"Activo","tutor":"Laura Martínez","telefono":"5553456789","empresa":"Next","empresaFact":"Next"},
+  {"id":4,"nombre":"Lucía Fernándex Castro","fechaNac":"2019-11-30","grupo":"Peque","sexo":"M","fechaIngreso":"2024-01-08","status":"Activo","tutor":"Pedro Fernández","telefono":"5554567890","empresa":"Comunidad","empresaFact":"Comunidad"},
+  {"id":5,"nombre":"Diego Hernándex Ruiz","fechaNac":"2018-05-20","grupo":"Intermedio","sexo":"H","fechaIngreso":"2024-01-08","status":"Activo","tutor":"Rosa Hernández","telefono":"5555678901","empresa":"Xtra","empresaFact":"Xtra"},
+  {"id":6,"nombre":"Sofia Díaz García","fechaNac":"2020-07-12","grupo":"Grande","sexo":"M","fechaIngreso":"2024-03-01","status":"Activo","tutor":"Alberto Díaz","telefono":"5556789012","empresa":"Comunidad","empresaFact":"Comunidad"},
+  {"id":7,"nombre":"Valentina Torres López","fechaNac":"2019-02-28","grupo":"Peque","sexo":"M","fechaIngreso":"2024-01-08","status":"Activo","tutor":"Marco Torres","telefono":"5557890123","empresa":"Next","empresaFact":"Next"},
+  {"id":8,"nombre":"Matías Jiménez Sánchez","fechaNac":"2018-12-05","grupo":"Intermedio","sexo":"H","fechaIngreso":"2024-01-08","status":"Activo","tutor":"Carmen Jiménez","telefono":"5558901234","empresa":"Xtra","empresaFact":"Xtra"},
+  {"id":9,"nombre":"Emma Rodríguez Vargas","fechaNac":"2019-09-18","grupo":"Grande","sexo":"M","fechaIngreso":"2024-02-01","status":"Activo","tutor":"Javier Rodríguez","telefono":"5559012345","empresa":"Comunidad","empresaFact":"Comunidad"},
+  {"id":10,"nombre":"Samuel Cruz Mendoza","fechaNac":"2020-04-25","grupo":"Peque","sexo":"H","fechaIngreso":"2024-03-15","status":"Activo","tutor":"Patricia Cruz","telefono":"5550123456","empresa":"Next","empresaFact":"Next"}
+]
