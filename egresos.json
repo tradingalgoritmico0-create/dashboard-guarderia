@@ -1,0 +1,5 @@
+[
+  {"fecha":"2026-01-05","descripcion":"Materiales oficina","monto":350,"categoria":"Útiles","status":"Pagado"},
+  {"fecha":"2026-01-10","descripcion":"Limpieza","monto":200,"categoria":"Mantenimiento","status":"Pagado"},
+  {"fecha":"2026-01-15","descripcion":"Snacks niños","monto":450,"categoria":"Alimentación","status":"Pagado"}
+]
