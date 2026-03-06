@@ -1,0 +1,17 @@
+[
+  {"fecha":"2026-01-06","alumno":"Juan Pérez García","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Ana García López","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Carlos Martínez Soto","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Lucía Fernández Castro","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Diego Hernández Ruiz","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Sofia Díaz García","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Valentina Torres López","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Matías Jiménez Sánchez","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Emma Rodríguez Vargas","status":"Presente","notas":""},
+  {"fecha":"2026-01-06","alumno":"Samuel Cruz Mendoza","status":"Presente","notas":""},
+  {"fecha":"2026-01-07","alumno":"Juan Pérez García","status":"Presente","notas":""},
+  {"fecha":"2026-01-07","alumno":"Ana García López","status":"Tarde","notas":"Llegó 10 min tarde"},
+  {"fecha":"2026-01-07","alumno":"Carlos Martínez Soto","status":"Presente","notas":""},
+  {"fecha":"2026-01-07","alumno":"Lucía Fernández Castro","status":"Ausente","notas":""},
+  {"fecha":"2026-01-07","alumno":"Diego Hernández Ruiz","status":"Presente","notas":""}
+]
