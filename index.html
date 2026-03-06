@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Guardería</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-building"></i> Dashboard Guardería
+            </a>
+            <div class="d-flex">
+                <select id="mesFilter" class="form-select form-select-sm me-2">
+                    <option value="todos">Todos los meses</option>
+                    <option value="Enero">Enero</option>
+                    <option value="Febrero">Febrero</option>
+                    <option value="Marzo">Marzo</option>
+                    <option value="Abril">Abril</option>
+                    <option value="Mayo">Mayo</option>
+                    <option value="Junio">Junio</option>
+                </select>
+                <select id="grupoFilter" class="form-select form-select-sm me-2">
+                    <option value="todos">Todos los grupos</option>
+                    <option value="Peque">Peque</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Grande">Grande</option>
+                </select>
+                <button id="refreshBtn" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Tarjetas KPI -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Alumnos Activos</h6>
+                                <h2 class="mb-0" id="totalAlumnos">-</h2>
+                            </div>
+                            <div class="icon-box bg-primary"><i class="bi bi-people-fill"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Pagos Recibidos</h6>
+                                <h2 class="mb-0" id="totalPagos">-</h2>
+                            </div>
+                            <div class="icon-box bg-success"><i class="bi bi-currency-dollar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">% Asistencia</h6>
+                                <h2 class="mb-0" id="asistenciaPromedio">-</h2>
+                            </div>
+                            <div class="icon-box bg-info"><i class="bi bi-check-circle-fill"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Balance</h6>
+                                <h2 class="mb-0" id="balance">-</h2>
+                            </div>
+                            <div class="icon-box bg-warning"><i class="bi bi-wallet2"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-pie-chart"></i> Alumnos por Grupo</h5></div>
+                    <div class="card-body"><canvas id="grupoChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-pie-chart"></i> Pagos por Empresa</h5></div>
+                    <div class="card-body"><canvas id="empresaPagosChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-pie-chart"></i> Egresos por Categoría</h5></div>
+                    <div class="card-body"><canvas id="egresosChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-bar-chart"></i> Asistencia Diaria</h5></div>
+                    <div class="card-body"><canvas id="asistenciaChart" height="80"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tablas -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Últimos Pagos</h5>
+                        <span class="badge bg-success" id="pagosBadge">0</span>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover" id="tablaPagos">
+                            <thead><tr><th>Fecha</th><th>Alumno</th><th>Mes</th><th>Monto</th><th>Tipo</th><th>Status</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-people"></i> Alumnos</h5>
+                        <span class="badge bg-primary" id="alumnosBadge">0</span>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover" id="tablaAlumnos">
+                            <thead><tr><th>Nombre</th><th>Grupo</th><th>Tutor</th><th>Empresa</th><th>Status</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Egresos y Alertas -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-cart-dash"></i> Egresos</h5>
+                        <span class="badge bg-warning" id="egresosBadge">0</span>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover" id="tablaEgresos">
+                            <thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Categoría</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white"><h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Alertas</h5></div>
+                    <div class="card-body">
+                        <div id="alertasContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-3 mt-4">
+        <p class="text-muted mb-0">Dashboard Guardería - Actualizado automáticamente</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
