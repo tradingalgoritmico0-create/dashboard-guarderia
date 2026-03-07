@@ -1,17 +1,18 @@
-// FunciÃ³n para sanitizar HTML y prevenir XSS
+// Función para sanitizar HTML y prevenir XSS
 function sanitize(str) {
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
     div.textContent = String(str);
     return div.innerHTML;
 }
+
 const CONFIG = {
-    GITHUB_RAW_URL: 'https://raw.githubusercontent.com/tradingalgoritmico0-create/dashboard-guarderia/main',
-    REFRESH_INTERVAL: 300000
+    SHEETS_ID: '1D-7MSO6Gcn_gtgqEhOM43lQXOVGDrzlM2ec8hitT5oQ',
+    BASE_URL: 'https://docs.google.com/spreadsheets/d'
 };
 
-function getCacheBuster() {
-    return '&t=' + Date.now();
+function getSheetsURL(sheetName) {
+    return `${CONFIG.BASE_URL}/${CONFIG.SHEETS_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}&v=${Date.now()}`;
 }
 
 let data = { alumnos: [], pagos: [], asistencia: [], egresos: [] };
@@ -43,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function inicializarFiltros() {
-    // Por defecto mostrar todos los datos (sin filtro de fecha)
     document.getElementById('filterFechaInicio').value = '';
     document.getElementById('filterFechaFin').value = '';
     
@@ -61,51 +61,139 @@ function cambiarSeccion(seccion) {
     document.getElementById(seccion).classList.add('active');
 }
 
-async function actualizarDashboard() {
+async function recargarDatos() {
     const btn = document.getElementById('btnActualizar');
-    const icon = btn.querySelector('i');
-    btn.disabled = true;
-    icon.classList.add('spinning');
-    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinning"></i> Cargando...';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spinning"></i> Cargando...';
+    }
     
     await cargarDatos();
     
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';
+    }
 }
 
 async function cargarDatos() {
     try {
-        const [alumnos, pagos, asistencia, egresos] = await Promise.all([
-            fetchJSON('alumnos.json'),
-            fetchJSON('pagos.json'),
-            fetchJSON('asistencia.json'),
-            fetchJSON('egresos.json')
+        const [alumnosCSV, pagosCSV, asistenciaCSV, egresosCSV] = await Promise.all([
+            fetchCSV('Alumnos'),
+            fetchCSV('Pagos'),
+            fetchCSV('Asistencia'),
+            fetchCSV('Egresos')
         ]);
         
-        data.alumnos = alumnos || [];
-        data.pagos = pagos || [];
-        data.asistencia = asistencia || [];
-        data.egresos = egresos || [];
+        data.alumnos = convertirAlumnos(alumnosCSV);
+        data.pagos = convertirPagos(pagosCSV);
+        data.asistencia = convertirAsistencia(asistenciaCSV);
+        data.egresos = convertirEgresos(egresosCSV);
         
         cargarEmpresasEnFiltro();
-        aplicarFiltros();
+        renderizarDashboard();
         
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
-async function fetchJSON(filename) {
-    const url = `${CONFIG.GITHUB_RAW_URL}/${filename}?v=${Date.now()}`;
+async function fetchCSV(sheetName) {
+    const url = getSheetsURL(sheetName);
     try {
         const response = await fetch(url);
-        if (!response.ok) return [];
-        return await response.json();
+        if (!response.ok) return '';
+        return await response.text();
     } catch (error) {
-        console.error('Error fetching:', filename, error);
-        return [];
+        console.error('Error fetching:', sheetName, error);
+        return '';
     }
+}
+
+function csvToJSON(csv) {
+    if (!csv || csv.trim() === '') return [];
+    const lines = csv.trim().split('\n');
+    if (lines.length < 2) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const result = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let char of lines[i]) {
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                values.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        values.push(current.trim());
+        
+        const obj = {};
+        headers.forEach((header, index) => {
+            obj[header] = values[index] || '';
+        });
+        result.push(obj);
+    }
+    return result;
+}
+
+function convertirAlumnos(csv) {
+    const rows = csvToJSON(csv);
+    return rows.map((row, index) => ({
+        id: index + 1,
+        nombre: row['Nombre'] || row['Nombre '] || '',
+        fechaNac: row['Fecha Nac.'] || row['Fecha Nac'] || '',
+        grupo: row['Grupo'] || '',
+        sexo: row['Sexo'] || '',
+        fechaIngreso: row['Fecha Ingreso'] || '',
+        status: row['Status'] || 'Activo',
+        tutor: row['Tutor'] || '',
+        telefono: row['Teléfono'] || row['Telefono'] || '',
+        empresa: row['Empresa'] || '',
+        empresaFact: row['Empresa Fact.'] || row['Empresa Fact'] || row['Empresa'] || ''
+    }));
+}
+
+function convertirPagos(csv) {
+    const rows = csvToJSON(csv);
+    return rows.map(row => ({
+        fecha: row['Fecha'] || '',
+        alumno: row['Alumno'] || '',
+        mes: row['Mes'] || '',
+        monto: parseFloat(row['Monto']) || 0,
+        tipo: row['Tipo'] || '',
+        referencia: row['Referencia'] || '',
+        status: row['Status'] || 'Pendiente',
+        fechaReg: row['Fecha Registro'] || row['Fecha'] || ''
+    }));
+}
+
+function convertirAsistencia(csv) {
+    const rows = csvToJSON(csv);
+    return rows.map(row => ({
+        fecha: row['Fecha'] || '',
+        alumno: row['Alumno'] || '',
+        status: row['Status'] || 'Presente',
+        notas: row['Notas'] || ''
+    }));
+}
+
+function convertirEgresos(csv) {
+    const rows = csvToJSON(csv);
+    return rows.map(row => ({
+        fecha: row['Fecha'] || '',
+        descripcion: row['Descripción'] || row['Descripcion'] || '',
+        monto: parseFloat(row['Monto']) || 0,
+        categoria: row['Categoría'] || row['Categoria'] || '',
+        status: row['Status'] || 'Pagado'
+    }));
 }
 
 function cargarEmpresasEnFiltro() {
@@ -130,7 +218,7 @@ function aplicarFiltros() {
     dataFiltrada.asistencia = data.asistencia.filter(a => filtrarAsistencia(a));
     dataFiltrada.egresos = data.egresos.filter(e => filtrarEgreso(e));
     
-    actualizarDashboard();
+    renderizarDashboard();
 }
 
 function filtrarAlumno(a) {
@@ -164,7 +252,7 @@ function filtrarEgreso(e) {
     return true;
 }
 
-function actualizarDashboard() {
+function renderizarDashboard() {
     actualizarResumen();
     actualizarAlumnos();
     actualizarPagos();
@@ -204,17 +292,15 @@ function actualizarResumen() {
     document.getElementById('kpiFacturacion').textContent = formatCurrency(facturacionEmpresa);
     document.getElementById('kpiAusencias').textContent = ausencias;
 
-    // Ãšltimos pagos
     const ultimosPagos = dataFiltrada.pagos.slice(-5).reverse();
     document.querySelector('#tablaUltimosPagos tbody').innerHTML = ultimosPagos.map(p => 
         `<tr><td>${sanitize(p.fecha)}</td><td>${sanitize(p.alumno)}</td><td>${formatCurrency(p.monto)}</td><td><span class="badge ${p.status === 'Pagado' ? 'bg-success' : 'bg-warning'}">${sanitize(p.status)}</span></td></tr>`
     ).join('');
 
-    // Alertas
     const alertas = [];
     if (pendientes > 0) alertas.push(`<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Pagos pendientes: ${formatCurrency(pendientes)}</div>`);
     if (ausencias > 0) alertas.push(`<div class="alert alert-danger"><i class="bi bi-person-dash"></i> Total ausencias: ${ausencias}</div>`);
-    if (activos < 5) alertas.push(`<div class="alert alert-info"><i class="bi bi-info-circle"></i> Baja inscripciÃ³n: ${activos} alumnos activos</div>`);
+    if (activos < 5) alertas.push(`<div class="alert alert-info"><i class="bi bi-info-circle"></i> Baja inscripción: ${activos} alumnos activos</div>`);
     document.getElementById('alertasContent').innerHTML = alertas.length ? alertas.join('') : '<div class="alert alert-success"><i class="bi bi-check-circle"></i> Sin alertas</div>';
 }
 
@@ -312,7 +398,6 @@ function actualizarFinanzas() {
     document.getElementById('finEgresos').textContent = formatCurrency(egresos);
     document.getElementById('finBalance').textContent = formatCurrency(balance);
     
-    // Tabla por empresa
     const empresas = {};
     dataFiltrada.alumnos.filter(a => a.status === 'Activo').forEach(a => {
         if (!empresas[a.empresa]) {
@@ -341,7 +426,6 @@ function actualizarFinanzas() {
 }
 
 function actualizarGraficos() {
-    // Grupo
     const grupos = { 'Peque': 0, 'Intermedio': 0, 'Grande': 0 };
     dataFiltrada.alumnos.filter(a => a.status === 'Activo').forEach(a => {
         if (grupos[a.grupo] !== undefined) grupos[a.grupo]++;
@@ -351,7 +435,6 @@ function actualizarGraficos() {
         datasets: [{ data: Object.values(grupos), backgroundColor: ['#4a90d9', '#28a745', '#ffc107'] }]
     });
 
-    // Empresa
     const ingresosPorEmpresa = {};
     dataFiltrada.pagos.filter(p => p.status === 'Pagado').forEach(p => {
         const alumno = data.alumnos.find(a => a.nombre === p.alumno);
@@ -363,7 +446,6 @@ function actualizarGraficos() {
         datasets: [{ data: Object.values(ingresosPorEmpresa), backgroundColor: ['#4a90d9', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'] }]
     });
 
-    // Asistencia por dÃ­a
     const asisPorDia = {};
     dataFiltrada.asistencia.forEach(a => {
         asisPorDia[a.fecha] = asisPorDia[a.fecha] || { presente: 0, ausente: 0, tarde: 0 };
@@ -381,7 +463,6 @@ function actualizarGraficos() {
         ]
     });
 
-    // Egresos por categorÃ­a
     const egresosCat = {};
     dataFiltrada.egresos.forEach(e => {
         egresosCat[e.categoria] = (egresosCat[e.categoria] || 0) + e.monto;
@@ -391,7 +472,6 @@ function actualizarGraficos() {
         datasets: [{ data: Object.values(egresosCat), backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#17a2b8', '#6f42c1'] }]
     });
 
-    // Pagos por mes
     const pagosPorMes = {};
     dataFiltrada.pagos.filter(p => p.status === 'Pagado').forEach(p => {
         const mes = p.mes;
@@ -402,7 +482,6 @@ function actualizarGraficos() {
         datasets: [{ label: 'Ingresos', data: Object.values(pagosPorMes), backgroundColor: '#28a745' }]
     });
 
-    // Financiero
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'];
     const ingresosMensuales = new Array(12).fill(0);
     const egresosMensuales = new Array(12).fill(0);
@@ -422,7 +501,6 @@ function actualizarGraficos() {
         ]
     });
 
-    // Margen
     const margenes = meses.map((_, i) => {
         const ing = ingresosMensuales[i];
         const egr = egresosMensuales[i];
@@ -451,8 +529,4 @@ function crearGrafico(id, tipo, datos) {
 
 function formatCurrency(value) {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(value);
-}
-
-function exportToExcel() {
-    alert('FunciÃ³n de exportaciÃ³n - Los datos se pueden copiar directamente de las tablas');
 }
