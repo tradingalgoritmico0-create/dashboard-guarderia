@@ -1,4 +1,4 @@
-// Función para sanitizar HTML y prevenir XSS
+// FunciÃ³n para sanitizar HTML y prevenir XSS
 function sanitize(str) {
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
@@ -59,6 +59,19 @@ function cambiarSeccion(seccion) {
     
     document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
     document.getElementById(seccion).classList.add('active');
+}
+
+async function actualizarDashboard() {
+    const btn = document.getElementById('btnActualizar');
+    const icon = btn.querySelector('i');
+    btn.disabled = true;
+    icon.classList.add('spinning');
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise spinning"></i> Cargando...';
+    
+    await cargarDatos();
+    
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';
 }
 
 async function cargarDatos() {
@@ -191,7 +204,7 @@ function actualizarResumen() {
     document.getElementById('kpiFacturacion').textContent = formatCurrency(facturacionEmpresa);
     document.getElementById('kpiAusencias').textContent = ausencias;
 
-    // Últimos pagos
+    // Ãšltimos pagos
     const ultimosPagos = dataFiltrada.pagos.slice(-5).reverse();
     document.querySelector('#tablaUltimosPagos tbody').innerHTML = ultimosPagos.map(p => 
         `<tr><td>${sanitize(p.fecha)}</td><td>${sanitize(p.alumno)}</td><td>${formatCurrency(p.monto)}</td><td><span class="badge ${p.status === 'Pagado' ? 'bg-success' : 'bg-warning'}">${sanitize(p.status)}</span></td></tr>`
@@ -201,7 +214,7 @@ function actualizarResumen() {
     const alertas = [];
     if (pendientes > 0) alertas.push(`<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Pagos pendientes: ${formatCurrency(pendientes)}</div>`);
     if (ausencias > 0) alertas.push(`<div class="alert alert-danger"><i class="bi bi-person-dash"></i> Total ausencias: ${ausencias}</div>`);
-    if (activos < 5) alertas.push(`<div class="alert alert-info"><i class="bi bi-info-circle"></i> Baja inscripción: ${activos} alumnos activos</div>`);
+    if (activos < 5) alertas.push(`<div class="alert alert-info"><i class="bi bi-info-circle"></i> Baja inscripciÃ³n: ${activos} alumnos activos</div>`);
     document.getElementById('alertasContent').innerHTML = alertas.length ? alertas.join('') : '<div class="alert alert-success"><i class="bi bi-check-circle"></i> Sin alertas</div>';
 }
 
@@ -350,7 +363,7 @@ function actualizarGraficos() {
         datasets: [{ data: Object.values(ingresosPorEmpresa), backgroundColor: ['#4a90d9', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'] }]
     });
 
-    // Asistencia por día
+    // Asistencia por dÃ­a
     const asisPorDia = {};
     dataFiltrada.asistencia.forEach(a => {
         asisPorDia[a.fecha] = asisPorDia[a.fecha] || { presente: 0, ausente: 0, tarde: 0 };
@@ -368,7 +381,7 @@ function actualizarGraficos() {
         ]
     });
 
-    // Egresos por categoría
+    // Egresos por categorÃ­a
     const egresosCat = {};
     dataFiltrada.egresos.forEach(e => {
         egresosCat[e.categoria] = (egresosCat[e.categoria] || 0) + e.monto;
@@ -441,5 +454,5 @@ function formatCurrency(value) {
 }
 
 function exportToExcel() {
-    alert('Función de exportación - Los datos se pueden copiar directamente de las tablas');
+    alert('FunciÃ³n de exportaciÃ³n - Los datos se pueden copiar directamente de las tablas');
 }
