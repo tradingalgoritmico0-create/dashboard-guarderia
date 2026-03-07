@@ -1,4 +1,4 @@
-// Función para sanitizar HTML y prevenir XSS
+// FunciÃ³n para sanitizar HTML y prevenir XSS
 function sanitize(str) {
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
@@ -27,7 +27,12 @@ let filtros = {
     search: ''
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+let data = { alumnos: [], pagos: [], asistencia: [], egresos: [] };
+let dataFiltrada = { alumnos: [], pagos: [], asistencia: [], egresos: [] };
+let charts = {};
+let cargaInicial = true;
+
+function initDashboard() {
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-MX', { 
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
@@ -41,7 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
             cambiarSeccion(this.dataset.section);
         });
     });
-});
+}
+
+document.addEventListener('DOMContentLoaded', initDashboard);
 
 function inicializarFiltros() {
     document.getElementById('filterFechaInicio').value = '';
@@ -68,6 +75,24 @@ async function recargarDatos() {
         btn.innerHTML = '<i class="bi bi-arrow-clockwise spinning"></i> Cargando...';
     }
     
+    // Reset filtros para mostrar todos los datos
+    filtros = {
+        fechaInicio: '',
+        fechaFin: '',
+        grupo: 'todos',
+        empresa: 'todos',
+        status: 'todos',
+        search: ''
+    };
+    
+    // Resetear los selectores de filtros
+    document.getElementById('filterFechaInicio').value = '';
+    document.getElementById('filterFechaFin').value = '';
+    document.getElementById('filterGrupo').value = 'todos';
+    document.getElementById('filterEmpresa').value = 'todos';
+    document.getElementById('filterStatus').value = 'todos';
+    document.getElementById('filterSearch').value = '';
+    
     await cargarDatos();
     
     if (btn) {
@@ -78,6 +103,8 @@ async function recargarDatos() {
 
 async function cargarDatos() {
     try {
+        mostrarCarga(true);
+        
         const [alumnosCSV, pagosCSV, asistenciaCSV, egresosCSV] = await Promise.all([
             fetchCSV('Alumnos'),
             fetchCSV('Pagos'),
@@ -91,10 +118,23 @@ async function cargarDatos() {
         data.egresos = convertirEgresos(egresosCSV);
         
         cargarEmpresasEnFiltro();
-        renderizarDashboard();
+        aplicarFiltros();
+        mostrarCarga(false);
         
     } catch (error) {
         console.error('Error:', error);
+        mostrarCarga(false);
+    }
+}
+
+function mostrarCarga(mostrar) {
+    const content = document.querySelector('.content-area');
+    if (content) {
+        if (mostrar) {
+            content.style.opacity = '0.5';
+        } else {
+            content.style.opacity = '1';
+        }
     }
 }
 
@@ -155,7 +195,7 @@ function convertirAlumnos(csv) {
         fechaIngreso: row['Fecha Ingreso'] || '',
         status: row['Status'] || 'Activo',
         tutor: row['Tutor'] || '',
-        telefono: row['Teléfono'] || row['Telefono'] || '',
+        telefono: row['TelÃ©fono'] || row['Telefono'] || '',
         empresa: row['Empresa'] || '',
         empresaFact: row['Empresa Fact.'] || row['Empresa Fact'] || row['Empresa'] || ''
     }));
@@ -189,9 +229,9 @@ function convertirEgresos(csv) {
     const rows = csvToJSON(csv);
     return rows.map(row => ({
         fecha: row['Fecha'] || '',
-        descripcion: row['Descripción'] || row['Descripcion'] || '',
+        descripcion: row['DescripciÃ³n'] || row['Descripcion'] || '',
         monto: parseFloat(row['Monto']) || 0,
-        categoria: row['Categoría'] || row['Categoria'] || '',
+        categoria: row['CategorÃ­a'] || row['Categoria'] || '',
         status: row['Status'] || 'Pagado'
     }));
 }
@@ -300,7 +340,7 @@ function actualizarResumen() {
     const alertas = [];
     if (pendientes > 0) alertas.push(`<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Pagos pendientes: ${formatCurrency(pendientes)}</div>`);
     if (ausencias > 0) alertas.push(`<div class="alert alert-danger"><i class="bi bi-person-dash"></i> Total ausencias: ${ausencias}</div>`);
-    if (activos < 5) alertas.push(`<div class="alert alert-info"><i class="bi bi-info-circle"></i> Baja inscripción: ${activos} alumnos activos</div>`);
+    if (activos < 5) alertas.push(`<div class="alert alert-info"><i class="bi bi-info-circle"></i> Baja inscripciÃ³n: ${activos} alumnos activos</div>`);
     document.getElementById('alertasContent').innerHTML = alertas.length ? alertas.join('') : '<div class="alert alert-success"><i class="bi bi-check-circle"></i> Sin alertas</div>';
 }
 
