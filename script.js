@@ -40,10 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function inicializarFiltros() {
-    const fechaActual = new Date();
-    const fechaInicio = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
-    document.getElementById('filterFechaInicio').value = fechaInicio.toISOString().split('T')[0];
-    document.getElementById('filterFechaFin').value = fechaActual.toISOString().split('T')[0];
+    // Por defecto mostrar todos los datos (sin filtro de fecha)
+    document.getElementById('filterFechaInicio').value = '';
+    document.getElementById('filterFechaFin').value = '';
     
     ['filterFechaInicio', 'filterFechaFin', 'filterGrupo', 'filterEmpresa', 'filterStatus', 'filterSearch'].forEach(id => {
         document.getElementById(id).addEventListener('change', aplicarFiltros);
