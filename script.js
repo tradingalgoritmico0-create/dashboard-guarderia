@@ -7,7 +7,7 @@ function sanitize(str) {
 }
 const CONFIG = {
     GITHUB_RAW_URL: 'https://raw.githubusercontent.com/tradingalgoritmico0-create/dashboard-guarderia/main',
-    REFRESH_INTERVAL: 60000
+    REFRESH_INTERVAL: 300000 // 5 minutos
 };
 
 let data = { alumnos: [], pagos: [], asistencia: [], egresos: [] };
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     inicializarFiltros();
     cargarDatos();
-    setInterval(cargarDatos, CONFIG.REFRESH_INTERVAL);
     
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
