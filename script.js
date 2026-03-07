@@ -7,8 +7,12 @@ function sanitize(str) {
 }
 const CONFIG = {
     GITHUB_RAW_URL: 'https://raw.githubusercontent.com/tradingalgoritmico0-create/dashboard-guarderia/main',
-    REFRESH_INTERVAL: 300000 // 5 minutos
+    REFRESH_INTERVAL: 300000
 };
+
+function getCacheBuster() {
+    return '&t=' + Date.now();
+}
 
 let data = { alumnos: [], pagos: [], asistencia: [], egresos: [] };
 let dataFiltrada = { alumnos: [], pagos: [], asistencia: [], egresos: [] };
@@ -80,7 +84,7 @@ async function cargarDatos() {
 }
 
 async function fetchJSON(filename) {
-    const url = `${CONFIG.GITHUB_RAW_URL}/${filename}`;
+    const url = `${CONFIG.GITHUB_RAW_URL}/${filename}?v=${Date.now()}`;
     try {
         const response = await fetch(url);
         if (!response.ok) return [];
