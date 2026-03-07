@@ -72,7 +72,7 @@ async function recargarDatos() {
     const btn = document.getElementById('btnActualizar');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-arrow-clockwise spinning"></i> Cargando...';
+        btn.innerHTML = '<i class="fas fa-sync"></i> Cargando...';
     }
     
     // Reset filtros para mostrar todos los datos
@@ -95,11 +95,15 @@ async function recargarDatos() {
     
     await cargarDatos();
     
+    // 🔥 LÍNEA CRÍTICA AÑADIDA - Forzar actualización completa
+    renderizarDashboard();
+    
     if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';
+        btn.innerHTML = '<i class="fas fa-sync"></i> Actualizar';
     }
 }
+
 
 async function cargarDatos() {
     try {
